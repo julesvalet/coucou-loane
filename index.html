@@ -598,7 +598,7 @@ function demarrerSnake(){
   arreter();
   tete={x:120,y:240};
   vel={x:1,y:0};attente=null;
-  vitesse=2.2;longueur=150;
+  vitesse=1.3;longueur=150;
   trail=[{x:tete.x,y:tete.y}];
   score=0;document.getElementById('score').textContent=0;
   nouvellePomme();
@@ -639,7 +639,7 @@ function tour(){
     document.getElementById('score').textContent=score;
     if(score>record){record=score;localStorage.setItem('record-snake-amoureux',record);document.getElementById('record').textContent=record;}
     longueur+=55;
-    vitesse=Math.min(3.4,2.2+score*0.07); /* ça accélère tout doucement */
+    vitesse=Math.min(2.2,1.3+score*0.05); /* ça accélère tout doucement */
     nouvellePomme();
   }
   dessiner();
