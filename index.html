@@ -677,6 +677,9 @@ const QUIZ=[
   {texte:"Quel est le surnom que Juju donne à Loane ? 🥰",
    choix:["Bébou","Lolo","Patate","Ma reine"],bonne:1,
    reaction:"Lolo & Juju, le duo parfait 💖"},
+  {texte:"Quelle est la plus grande qualité de Lolo ? ✨",
+   choix:["Son sourire","Sa gentillesse","Son humour","Sa beauté"],toutes:true,
+   reaction:"Piégé ! Toutes les réponses étaient bonnes, évidemment 😌💅"},
   {texte:"Ton Juju est... 😏",
    choix:["Beau","Très beau","Magnifique","Toutes les réponses"],bonne:3,
    reaction:"Évidemment 😌💅"},
@@ -735,13 +738,19 @@ function repondre(i){
   quizBloque=true;
   const q=QUIZ[quizIndex];
   const boutons=document.querySelectorAll('.quiz-reponses button');
-  boutons.forEach((b,j)=>{
-    if(j===q.bonne)b.classList.add('bonne');
-    else b.classList.add('mauvaise');
-  });
   const reaction=document.getElementById('quiz-reaction');
-  if(i===q.bonne){quizScore++;reaction.textContent='✅ '+q.reaction;}
-  else reaction.textContent='❌ Eh non ! '+q.reaction;
+  if(q.toutes){ /* question piège : toutes les réponses sont bonnes */
+    boutons.forEach(b=>b.classList.add('bonne'));
+    quizScore++;
+    reaction.textContent='✅ '+q.reaction;
+  }else{
+    boutons.forEach((b,j)=>{
+      if(j===q.bonne)b.classList.add('bonne');
+      else b.classList.add('mauvaise');
+    });
+    if(i===q.bonne){quizScore++;reaction.textContent='✅ '+q.reaction;}
+    else reaction.textContent='❌ Eh non ! '+q.reaction;
+  }
   setTimeout(()=>{
     quizIndex++;
     if(quizIndex<QUIZ.length)montrerQuestion();
