@@ -536,8 +536,9 @@ async function terminerEtEnvoyer(){
 /* ============ SNAKE ============ */
 const canvas=document.getElementById('canvas-snake');
 const ctx=canvas.getContext('2d');
-const TAILLE=12, CASE=canvas.width/TAILLE;
-let serpent,dir,dirAttente,pomme,score=0,record=+(localStorage.getItem('record-snake-amoureux')||0),boucle=null,enJeu=false;
+const LARGEUR_CORPS=30, RAYON_TETE=23, RAYON_POMME=23;
+let tete,vel,attente,trail,longueur,vitesse,pomme;
+let score=0,record=+(localStorage.getItem('record-snake-amoureux')||0),anim=null,enJeu=false;
 document.getElementById('record').textContent=record;
 
 const imgLoane=new Image();imgLoane.src='images/loane.png';
@@ -554,104 +555,140 @@ function cacherSnake(){
   document.getElementById('zone-snake').classList.add('cache');
   document.getElementById('fin').classList.remove('cache');
 }
-function arreter(){if(boucle){clearInterval(boucle);boucle=null;}enJeu=false;}
+function arreter(){if(anim){cancelAnimationFrame(anim);anim=null;}enJeu=false;}
 
-function dessinerTete(img,x,y,taille,secours){
+function fond(){
+  const c=60;
+  for(let i=0;i<8;i++)for(let j=0;j<8;j++){
+    ctx.fillStyle=(i+j)%2?'#fff2f7':'#ffe9f2';
+    ctx.fillRect(i*c,j*c,c,c);
+  }
+}
+function dessinerTete(img,cx,cy,rayon,secours){
   if(img.complete&&img.naturalWidth>0){
     ctx.save();
     ctx.beginPath();
-    ctx.arc(x+taille/2,y+taille/2,taille/2-1,0,Math.PI*2);
+    ctx.arc(cx,cy,rayon,0,Math.PI*2);
     ctx.clip();
     /* recadrage carré centré de la photo */
     const s=Math.min(img.naturalWidth,img.naturalHeight);
-    ctx.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,x,y,taille,taille);
+    ctx.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,cx-rayon,cy-rayon,rayon*2,rayon*2);
     ctx.restore();
+    ctx.beginPath();
+    ctx.arc(cx,cy,rayon,0,Math.PI*2);
+    ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
   }else{
-    ctx.font=(taille-4)+'px serif';
+    ctx.font=(rayon*2-8)+'px serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(secours,x+taille/2,y+taille/2+1);
+    ctx.fillText(secours,cx,cy+2);
+    ctx.textBaseline='alphabetic';
   }
 }
 function dessinerAccueil(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#ffe4ef';ctx.fillRect(0,0,canvas.width,canvas.height);
+  fond();
   ctx.fillStyle='#f25c94';
   ctx.font='bold 26px Quicksand,sans-serif';ctx.textAlign='center';
-  ctx.fillText('Appuie sur ▶️ pour jouer !',canvas.width/2,canvas.height/2-28);
-  dessinerTete(imgLoane,canvas.width/2-72,canvas.height/2,56,'🐍');
-  ctx.fillText('➜',canvas.width/2,canvas.height/2+32);
-  dessinerTete(imgJules,canvas.width/2+18,canvas.height/2,56,'💖');
+  ctx.fillText('Appuie sur ▶️ pour jouer !',240,205);
+  dessinerTete(imgLoane,185,262,28,'🐍');
+  ctx.fillStyle='#f25c94';
+  ctx.fillText('➜',240,270);
+  dessinerTete(imgJules,295,262,28,'💖');
 }
 function demarrerSnake(){
   arreter();
-  serpent=[{x:5,y:6},{x:4,y:6},{x:3,y:6}];
-  dir={x:1,y:0};dirAttente=dir;
+  tete={x:120,y:240};
+  vel={x:1,y:0};attente=null;
+  vitesse=2.2;longueur=150;
+  trail=[{x:tete.x,y:tete.y}];
   score=0;document.getElementById('score').textContent=0;
   nouvellePomme();
   enJeu=true;
-  boucle=setInterval(tour,180);
+  anim=requestAnimationFrame(tour);
 }
 function nouvellePomme(){
   do{
-    pomme={x:Math.floor(Math.random()*TAILLE),y:Math.floor(Math.random()*TAILLE)};
-  }while(serpent.some(s=>s.x===pomme.x&&s.y===pomme.y));
+    pomme={x:45+Math.random()*390,y:45+Math.random()*390};
+  }while(Math.hypot(pomme.x-tete.x,pomme.y-tete.y)<140);
 }
 function direction(x,y){
   if(!enJeu)return;
-  if(x===-dir.x&&y===-dir.y)return; /* pas de demi-tour */
-  dirAttente={x,y};
+  if(x===-vel.x&&y===-vel.y)return; /* pas de demi-tour */
+  attente={x,y};
 }
 function tour(){
-  dir=dirAttente;
-  const tete={x:serpent[0].x+dir.x,y:serpent[0].y+dir.y};
-  if(tete.x<0||tete.y<0||tete.x>=TAILLE||tete.y>=TAILLE||serpent.some(s=>s.x===tete.x&&s.y===tete.y)){
-    perdu();return;
+  if(!enJeu)return;
+  if(attente){
+    if(!(attente.x===-vel.x&&attente.y===-vel.y))vel=attente;
+    attente=null;
   }
-  serpent.unshift(tete);
-  if(tete.x===pomme.x&&tete.y===pomme.y){
+  tete.x+=vel.x*vitesse;
+  tete.y+=vel.y*vitesse;
+  trail.unshift({x:tete.x,y:tete.y});
+  while(trail.length>Math.floor(longueur/vitesse))trail.pop();
+  /* murs */
+  const marge=RAYON_TETE-6;
+  if(tete.x<marge||tete.y<marge||tete.x>480-marge||tete.y>480-marge){perdu();return;}
+  /* se mordre soi-même (on saute le début du cou) */
+  const cou=Math.ceil((RAYON_TETE*2.6)/vitesse);
+  for(let i=cou;i<trail.length;i++){
+    if(Math.hypot(trail[i].x-tete.x,trail[i].y-tete.y)<LARGEUR_CORPS/2+RAYON_TETE*0.55){perdu();return;}
+  }
+  /* miam */
+  if(Math.hypot(pomme.x-tete.x,pomme.y-tete.y)<RAYON_TETE+RAYON_POMME-8){
     score++;
     document.getElementById('score').textContent=score;
     if(score>record){record=score;localStorage.setItem('record-snake-amoureux',record);document.getElementById('record').textContent=record;}
+    longueur+=55;
+    vitesse=Math.min(3.4,2.2+score*0.07); /* ça accélère tout doucement */
     nouvellePomme();
-  }else{
-    serpent.pop();
   }
   dessiner();
+  anim=requestAnimationFrame(tour);
 }
 function dessiner(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  /* damier rose */
-  for(let i=0;i<TAILLE;i++)for(let j=0;j<TAILLE;j++){
-    ctx.fillStyle=(i+j)%2?'#fff2f7':'#ffe9f2';
-    ctx.fillRect(i*CASE,j*CASE,CASE,CASE);
-  }
-  /* corps */
-  serpent.slice(1).forEach((s,i)=>{
-    ctx.fillStyle=i%2?'#ff8fb8':'#f25c94';
+  fond();
+  /* trainée fluide : un seul trait épais et arrondi qui suit le chemin */
+  if(trail.length>1){
+    ctx.lineCap='round';ctx.lineJoin='round';
     ctx.beginPath();
-    ctx.arc(s.x*CASE+CASE/2,s.y*CASE+CASE/2,CASE/2-3,0,Math.PI*2);
-    ctx.fill();
-  });
-  /* tête = Loane, pomme = Jules */
-  dessinerTete(imgJules,pomme.x*CASE,pomme.y*CASE,CASE,'💖');
-  dessinerTete(imgLoane,serpent[0].x*CASE,serpent[0].y*CASE,CASE,'🐍');
+    ctx.moveTo(trail[0].x,trail[0].y);
+    for(let i=1;i<trail.length;i++)ctx.lineTo(trail[i].x,trail[i].y);
+    ctx.strokeStyle='#f25c94';ctx.lineWidth=LARGEUR_CORPS;ctx.stroke();
+    ctx.strokeStyle='#ff9dc0';ctx.lineWidth=LARGEUR_CORPS-12;ctx.stroke();
+  }
+  /* tête = Loane, à attraper = Jules */
+  dessinerTete(imgJules,pomme.x,pomme.y,RAYON_POMME,'💖');
+  dessinerTete(imgLoane,tete.x,tete.y,RAYON_TETE,'🐍');
 }
 function perdu(){
   arreter();
+  dessiner();
   ctx.fillStyle='#f25c94dd';
-  ctx.fillRect(0,canvas.height/2-60,canvas.width,120);
+  ctx.fillRect(0,180,480,120);
   ctx.fillStyle='#fff';
   ctx.font='bold 28px Quicksand,sans-serif';ctx.textAlign='center';
-  ctx.fillText('Perdu ma chérie 🥺',canvas.width/2,canvas.height/2-14);
+  ctx.fillText('Perdu ma chérie 🥺',240,226);
   ctx.font='20px Quicksand,sans-serif';
-  ctx.fillText('Score : '+score+' 💘 — appuie sur ▶️',canvas.width/2,canvas.height/2+26);
+  ctx.fillText('Score : '+score+' 💘 — appuie sur ▶️',240,266);
 }
 /* ============ QUIZ DE L'AMOUR ============ */
 /* MODIFIE TES QUESTIONS ICI : texte, choix, et "bonne" = numéro de la bonne réponse (0 = première) */
 const QUIZ=[
-  {texte:"Ton copain est... 😏",
+  {texte:"Ton Juju est... 😏",
    choix:["Beau","Très beau","Magnifique","Toutes les réponses"],bonne:3,
    reaction:"Évidemment 😌💅"},
+  {texte:"On s'est rencontrés quand ? 📅",
+   choix:["Le 14/02/2022","Le 29/09/2022","Le 01/01/2023","Le 29/09/2021"],bonne:1,
+   reaction:"Le 29 septembre 2022, la plus belle date du monde 🥹"},
+  {texte:"Notre première anecdote c'est... 😳",
+   choix:["Il m'a renversé son verre dessus","Il a oublié mon prénom","Il m'a brûlé les cheveux avec un briquet","Il est tombé dans les escaliers"],bonne:2,
+   reaction:"Pardon encore pour les cheveux 🔥😅"},
+  {texte:"Le plat préféré de ton Juju ? 🍝",
+   choix:["La pizza","Les sushis","La raclette","Les pâtes au pesto et les burgers"],bonne:3,
+   reaction:"Pesto + burgers = la vie 😌🍔"},
+  {texte:"L'artiste préféré de ton Juju ? 🎧",
+   choix:["Drake","Femtogo","Jul","PNL"],bonne:1,
+   reaction:"Femtogo à fond dans la voiture 🔊"},
   {texte:"C'est quoi le plus beau prénom du monde ? ✨",
    choix:["Léa","Emma","Loane","Toutes sauf Loane"],bonne:2,
    reaction:"Bien sûr que c'est Loane 💖"},
