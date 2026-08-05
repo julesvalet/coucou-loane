@@ -44,7 +44,7 @@
     z-index:1;
     max-width:560px;
     margin:0 auto;
-    padding:28px 18px 60px;
+    padding:28px 18px 100px;
     text-align:center;
   }
   .coucou{
@@ -220,9 +220,84 @@
   }
   .fleches button:active{background:var(--rose-clair);}
   .petit{font-size:13px;opacity:.75;margin-top:10px;}
+  /* ---- BOUTON QUIZ FLOTTANT ---- */
+  #bouton-quiz{
+    position:fixed;
+    bottom:18px;
+    right:18px;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:linear-gradient(135deg,var(--rose-fonce),#ff7fb0);
+    color:#fff;
+    border:none;
+    font-family:'Quicksand',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    padding:13px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 6px 20px #c93a6e66;
+    animation:bat 2.2s ease infinite;
+  }
+  #bouton-quiz .icone{font-size:20px;line-height:1;}
+  /* ---- FENETRE QUIZ ---- */
+  #voile-quiz{
+    position:fixed;
+    inset:0;
+    z-index:60;
+    background:#c93a6e55;
+    backdrop-filter:blur(3px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  #fenetre-quiz{
+    background:var(--blanc);
+    border-radius:24px;
+    box-shadow:0 12px 40px #c93a6e55;
+    padding:24px 20px;
+    max-width:420px;
+    width:100%;
+    max-height:85vh;
+    overflow-y:auto;
+    text-align:center;
+    position:relative;
+    animation:pop .35s ease;
+  }
+  #fermer-quiz{
+    position:absolute;
+    top:10px;right:14px;
+    background:none;border:none;
+    font-size:22px;
+    color:var(--rose);
+    cursor:pointer;
+    font-weight:700;
+  }
+  .quiz-progres{font-size:13px;font-weight:700;color:var(--rose);letter-spacing:1px;margin-bottom:8px;}
+  .quiz-question{font-size:19px;font-weight:700;margin-bottom:16px;}
+  .quiz-reponses{display:flex;flex-direction:column;gap:10px;}
+  .quiz-reponses button{
+    border:2px solid var(--rose-clair);
+    background:#fff;
+    color:var(--rose-tres-fonce);
+    font-family:'Quicksand',sans-serif;
+    font-size:16px;
+    font-weight:600;
+    padding:13px 16px;
+    border-radius:16px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .quiz-reponses button:hover{transform:translateY(-2px);box-shadow:0 4px 10px #f25c9440;}
+  .quiz-reponses button.bonne{background:#ffd6e6;border-color:var(--rose-fonce);}
+  .quiz-reponses button.mauvaise{opacity:.45;}
+  .quiz-reaction{margin-top:14px;font-weight:700;font-size:16px;min-height:22px;}
   /* petits écrans */
   @media (max-width:420px){
-    .conteneur{padding:18px 10px 40px;}
+    .conteneur{padding:18px 10px 90px;}
     .carte{padding:18px 12px;border-radius:20px;}
     .question{font-size:18px;}
     .phrase-amour{font-size:16px;padding:12px 14px;}
@@ -319,6 +394,20 @@
 
   <div class="points" id="points">
     <div class="point actif"></div><div class="point"></div><div class="point"></div><div class="point"></div>
+  </div>
+</div>
+
+<!-- BOUTON QUIZ TOUJOURS VISIBLE -->
+<button id="bouton-quiz" onclick="ouvrirQuiz()">
+  <span class="icone">💘</span> Quiz
+</button>
+
+<!-- FENETRE DU QUIZ -->
+<div id="voile-quiz" class="cache">
+  <div id="fenetre-quiz">
+    <button id="fermer-quiz" onclick="fermerQuiz()">✖</button>
+    <p class="etape-titre">Le quiz de l'amour 💘</p>
+    <div id="quiz-contenu"></div>
   </div>
 </div>
 
@@ -557,6 +646,84 @@ function perdu(){
   ctx.font='20px Quicksand,sans-serif';
   ctx.fillText('Score : '+score+' 💘 — appuie sur ▶️',canvas.width/2,canvas.height/2+26);
 }
+/* ============ QUIZ DE L'AMOUR ============ */
+/* MODIFIE TES QUESTIONS ICI : texte, choix, et "bonne" = numéro de la bonne réponse (0 = première) */
+const QUIZ=[
+  {texte:"Ton copain est... 😏",
+   choix:["Beau","Très beau","Magnifique","Toutes les réponses"],bonne:3,
+   reaction:"Évidemment 😌💅"},
+  {texte:"C'est quoi le plus beau prénom du monde ? ✨",
+   choix:["Léa","Emma","Loane","Toutes sauf Loane"],bonne:2,
+   reaction:"Bien sûr que c'est Loane 💖"},
+  {texte:"Ton nounou pense à toi... 💭",
+   choix:["Parfois","Souvent","Tout le temps","Seulement le mardi"],bonne:2,
+   reaction:"Littéralement TOUT le temps 🥹"},
+  {texte:"Le meilleur endroit du monde c'est... 🌍",
+   choix:["Les Maldives","Paris","Starbucks","Dans ses bras"],bonne:3,
+   reaction:"Et c'est gratuit en plus 🥰"},
+  {texte:"Qui gagne au UNO d'habitude ? 🃏",
+   choix:["Toi ma reine 👑","Ton copain","Le hasard","Personne, on triche 😏"],bonne:0,
+   reaction:"On va dire ça oui... 😅"},
+  {texte:"Si tu t'ennuies, tu dois... 📞",
+   choix:["Regarder le plafond","Appeler ton nounou","Compter les moutons","Ranger ta chambre"],bonne:1,
+   reaction:"Il attend que ça 💗"},
+];
+let quizIndex=0,quizScore=0,quizBloque=false;
+
+function ouvrirQuiz(){
+  quizIndex=0;quizScore=0;
+  document.getElementById('voile-quiz').classList.remove('cache');
+  montrerQuestion();
+}
+function fermerQuiz(){
+  document.getElementById('voile-quiz').classList.add('cache');
+}
+function montrerQuestion(){
+  quizBloque=false;
+  const q=QUIZ[quizIndex];
+  const zone=document.getElementById('quiz-contenu');
+  zone.innerHTML=
+    '<p class="quiz-progres">QUESTION '+(quizIndex+1)+' / '+QUIZ.length+' — SCORE '+quizScore+' 💘</p>'+
+    '<p class="quiz-question">'+q.texte+'</p>'+
+    '<div class="quiz-reponses">'+
+      q.choix.map((c,i)=>'<button onclick="repondre('+i+')">'+c+'</button>').join('')+
+    '</div>'+
+    '<p class="quiz-reaction" id="quiz-reaction"></p>';
+}
+function repondre(i){
+  if(quizBloque)return;
+  quizBloque=true;
+  const q=QUIZ[quizIndex];
+  const boutons=document.querySelectorAll('.quiz-reponses button');
+  boutons.forEach((b,j)=>{
+    if(j===q.bonne)b.classList.add('bonne');
+    else b.classList.add('mauvaise');
+  });
+  const reaction=document.getElementById('quiz-reaction');
+  if(i===q.bonne){quizScore++;reaction.textContent='✅ '+q.reaction;}
+  else reaction.textContent='❌ Eh non ! '+q.reaction;
+  setTimeout(()=>{
+    quizIndex++;
+    if(quizIndex<QUIZ.length)montrerQuestion();
+    else finQuiz();
+  },1600);
+}
+function finQuiz(){
+  let msg;
+  if(quizScore===QUIZ.length)msg="Score parfait ! Tu nous connais par cœur, t'es officiellement la meilleure copine du monde 💖👑";
+  else if(quizScore>=QUIZ.length-2)msg="Presque parfait ! Ton nounou est fier de toi 🥰";
+  else msg="Aïe aïe aïe... il va falloir réviser votre couple ensemble, quelle bonne excuse pour se voir 😏💕";
+  document.getElementById('quiz-contenu').innerHTML=
+    '<span class="gros-coeur">💘</span>'+
+    '<p class="quiz-question">'+quizScore+' / '+QUIZ.length+'</p>'+
+    '<p class="message-chou" style="font-size:16px;">'+msg+'</p>'+
+    '<button class="bouton" onclick="ouvrirQuiz()">Rejouer 🔄</button>'+
+    '<button class="bouton secondaire" onclick="fermerQuiz()" style="margin-top:10px;">Fermer 💗</button>';
+}
+document.getElementById('voile-quiz').addEventListener('click',e=>{
+  if(e.target.id==='voile-quiz')fermerQuiz();
+});
+
 /* clavier */
 document.addEventListener('keydown',e=>{
   if(document.getElementById('zone-snake').classList.contains('cache'))return;
