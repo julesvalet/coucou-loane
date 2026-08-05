@@ -44,7 +44,7 @@
     z-index:1;
     max-width:560px;
     margin:0 auto;
-    padding:28px 18px 100px;
+    padding:60px 18px 150px;
     text-align:center;
   }
   .coucou{
@@ -250,27 +250,242 @@
     background:linear-gradient(135deg,#f6b93b,#ffd32a);
     box-shadow:0 6px 20px #f6b93b66;
   }
-  #bouton-dispute{
-    right:auto;
-    left:50%;
-    margin-left:-86px;
-    width:172px;
-    justify-content:center;
+  /* ---- PROFIL EN HAUT A GAUCHE ---- */
+  #bouton-profil{
+    position:fixed;
+    top:14px;left:14px;
+    z-index:50;
+    display:flex;align-items:center;gap:8px;
+    background:#fffffff0;
+    border:2px solid var(--rose-clair);
+    border-radius:999px;
+    padding:5px 14px 5px 5px;
+    cursor:pointer;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
     font-size:14px;
-    padding:13px 8px;
-    background:linear-gradient(135deg,#c0392b,#e74c3c);
-    box-shadow:0 6px 20px #c0392b66;
-    animation:gronder 3s ease infinite;
+    color:var(--rose-tres-fonce);
+    box-shadow:0 4px 14px #f25c9430;
   }
-  @keyframes gronder{
-    0%,86%,100%{transform:rotate(0);}
-    88%{transform:rotate(-2deg);}
-    91%{transform:rotate(2deg);}
-    94%{transform:rotate(-1.5deg);}
-    97%{transform:rotate(1.5deg);}
+  #bouton-profil img{
+    width:34px;height:34px;border-radius:50%;object-fit:cover;
+    border:2px solid var(--rose);
   }
+  #bouton-profil .rond-vide{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--rose-clair);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+  }
+  .choix-profil{display:flex;gap:14px;justify-content:center;margin-top:8px;}
+  .choix-profil button{
+    background:#fff;
+    border:3px solid var(--rose-clair);
+    border-radius:22px;
+    padding:14px 10px;
+    cursor:pointer;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--rose-tres-fonce);
+    flex:1;
+    transition:all .15s;
+  }
+  .choix-profil button:hover{border-color:var(--rose-fonce);transform:translateY(-3px);}
+  .choix-profil img{
+    width:88px;height:88px;border-radius:50%;object-fit:cover;
+    display:block;margin:0 auto 8px;border:3px solid var(--rose);
+  }
+  /* ---- NOW BAR ---- */
+  #nowbar{
+    position:fixed;
+    bottom:16px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(300px,calc(100vw - 190px));
+    height:56px;
+    z-index:50;
+    border-radius:999px;
+    overflow:hidden;
+    box-shadow:0 8px 24px #00000038;
+  }
+  #nowbar-piste{
+    display:flex;
+    width:200%;
+    height:100%;
+    transition:transform .35s cubic-bezier(.4,0,.2,1);
+  }
+  .nowbar-carte{
+    width:50%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    cursor:pointer;
+    position:relative;
+    color:#fff;
+    font-weight:700;
+    font-size:14px;
+    padding:0 12px;
+    text-align:left;
+    border:none;
+    font-family:'Quicksand',sans-serif;
+  }
+  .nowbar-carte .ico{font-size:20px;flex-shrink:0;}
+  .nowbar-carte .txt{line-height:1.15;}
+  .nowbar-carte .txt small{display:block;font-weight:600;font-size:11px;opacity:.9;}
+  #carte-pilule{background:linear-gradient(135deg,#e84393,#fd79a8);}
+  #carte-dispute{background:linear-gradient(135deg,#2c3e50,#4a5568);}
+  /* orage animé dans le bouton dispute */
+  #carte-dispute .nuages{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 60px 22px at 20% 30%,#ffffff26,transparent 70%),
+      radial-gradient(ellipse 70px 26px at 70% 65%,#ffffff1f,transparent 70%),
+      radial-gradient(ellipse 50px 20px at 45% 20%,#ffffff1a,transparent 70%);
+    animation:nuages 9s linear infinite;
+  }
+  @keyframes nuages{0%{background-position:0 0,0 0,0 0;}100%{background-position:120px 0,-120px 0,90px 0;}}
+  #carte-dispute .eclair{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,#ffffffcc,#ffffff00 60%);
+    opacity:0;
+    animation:eclair 5s linear infinite;
+  }
+  @keyframes eclair{
+    0%,88%,100%{opacity:0;}
+    89%{opacity:.85;}
+    90.5%{opacity:0;}
+    92%{opacity:.6;}
+    93%{opacity:0;}
+  }
+  #carte-dispute .pluie{
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(105deg,#ffffff33 0 1px,transparent 1px 9px);
+    animation:pluie .55s linear infinite;
+    opacity:.5;
+  }
+  @keyframes pluie{0%{background-position:0 0;}100%{background-position:-26px 34px;}}
+  #carte-dispute .ico,#carte-dispute .txt{position:relative;z-index:2;text-shadow:0 1px 3px #0009;}
+  #nowbar-points{
+    position:fixed;
+    bottom:6px;left:50%;transform:translateX(-50%);
+    display:flex;gap:5px;z-index:50;
+  }
+  #nowbar-points span{
+    width:6px;height:6px;border-radius:50%;
+    background:#c93a6e55;transition:all .2s;
+  }
+  #nowbar-points span.on{background:var(--rose-fonce);width:16px;border-radius:3px;}
+  /* ---- BOUTON BLOC-NOTE ---- */
+  #bouton-bloc{
+    position:fixed;
+    bottom:84px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:50;
+    display:flex;align-items:center;gap:7px;
+    background:#fffffff2;
+    border:2px solid var(--rose-clair);
+    color:var(--rose-tres-fonce);
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;font-size:13px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 4px 14px #f25c9438;
+    white-space:nowrap;
+  }
+  #bouton-bloc .pastille{
+    background:var(--rose-fonce);color:#fff;
+    border-radius:999px;font-size:11px;
+    padding:1px 6px;
+  }
+  /* ---- BLOC-NOTE ---- */
+  .page-note{
+    background:#fff;
+    border:2px solid var(--rose-clair);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:12px;
+    text-align:left;
+    position:relative;
+    transform-origin:center;
+  }
+  .page-note .entete{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:700;color:var(--rose);
+    margin-bottom:6px;
+  }
+  .page-note .entete img{width:22px;height:22px;border-radius:50%;object-fit:cover;}
+  .page-note h4{font-size:16px;color:var(--rose-tres-fonce);margin-bottom:4px;}
+  .page-note p{font-size:15px;line-height:1.5;white-space:pre-wrap;}
+  .page-note .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .page-note .actions button{
+    border:none;background:var(--rose-bb);
+    color:var(--rose-tres-fonce);
+    font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;
+    padding:7px 12px;border-radius:999px;cursor:pointer;
+  }
+  .page-note .actions .feu{background:#ffe0cc;}
+  .page-note .actions .dechirer{background:#e8e8e8;}
+  .etiquette{
+    font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:999px;
+    background:var(--rose-clair);color:var(--rose-tres-fonce);
+  }
+  .etiquette.prive{background:#e0d4ff;color:#5b3fa8;}
+  .reponse-note{
+    background:var(--rose-bb);
+    border-radius:12px;
+    padding:9px 12px;
+    margin-top:8px;
+    font-size:14px;
+    line-height:1.45;
+    text-align:left;
+  }
+  .reponse-note .qui{font-weight:700;font-size:12px;color:var(--rose-fonce);display:block;}
+  /* animations suppression */
+  @keyframes brule{
+    0%{filter:none;transform:scale(1);opacity:1;}
+    35%{filter:sepia(1) saturate(6) hue-rotate(-25deg) brightness(1.15);transform:scale(.99) rotate(-.5deg);}
+    70%{filter:sepia(1) saturate(9) hue-rotate(-35deg) brightness(.6);transform:scale(.9) rotate(1deg);opacity:.75;}
+    100%{filter:brightness(0) saturate(0);transform:scale(.55) rotate(4deg) translateY(30px);opacity:0;}
+  }
+  .page-note.en-feu{
+    animation:brule 1.5s ease forwards;
+    box-shadow:0 0 26px 8px #ff8c2e88;
+  }
+  .page-note.en-feu::after{
+    content:'🔥🔥🔥';
+    position:absolute;left:0;right:0;bottom:-6px;
+    text-align:center;font-size:26px;
+    animation:flammes .5s ease-in-out infinite alternate;
+  }
+  @keyframes flammes{from{transform:translateY(0) scale(1);opacity:.9;}to{transform:translateY(-10px) scale(1.15);opacity:1;}}
+  .page-note.dechiree{position:relative;overflow:hidden;animation:disparait 1s ease .55s forwards;}
+  @keyframes disparait{to{opacity:0;height:0;margin:0;padding:0;border-width:0;}}
+  .page-note.dechiree .moitie{
+    position:absolute;top:0;bottom:0;width:50%;
+    background:#fff;
+    z-index:3;
+    display:flex;align-items:center;
+  }
+  .page-note.dechiree .moitie.g{
+    left:0;
+    border-right:3px dashed #ddd;
+    animation:dechireG 1s cubic-bezier(.5,0,.75,0) forwards;
+  }
+  .page-note.dechiree .moitie.d{
+    right:0;
+    border-left:3px dashed #ddd;
+    animation:dechireD 1s cubic-bezier(.5,0,.75,0) forwards;
+  }
+  @keyframes dechireG{to{transform:translate(-70%,40%) rotate(-28deg);opacity:0;}}
+  @keyframes dechireD{to{transform:translate(70%,45%) rotate(26deg);opacity:0;}}
   /* ---- FENETRES (quiz, étoile, dispute) ---- */
-  #voile-quiz,#voile-etoile,#voile-dispute{
+  #voile-quiz,#voile-etoile,#voile-dispute,#voile-profil,#voile-pilule,#voile-bloc{
     position:fixed;
     inset:0;
     z-index:60;
@@ -281,7 +496,7 @@
     justify-content:center;
     padding:16px;
   }
-  #fenetre-quiz,#fenetre-etoile,#fenetre-dispute{
+  #fenetre-quiz,#fenetre-etoile,#fenetre-dispute,#fenetre-profil,#fenetre-pilule,#fenetre-bloc{
     background:var(--blanc);
     border-radius:24px;
     box-shadow:0 12px 40px #c93a6e55;
@@ -337,7 +552,7 @@
   .notes .chip{min-width:46px;padding:11px 0;text-align:center;}
   /* petits écrans */
   @media (max-width:420px){
-    .conteneur{padding:18px 10px 90px;}
+    .conteneur{padding:58px 10px 150px;}
     .carte{padding:18px 12px;border-radius:20px;}
     .question{font-size:18px;}
     .phrase-amour{font-size:16px;padding:12px 14px;}
@@ -346,9 +561,14 @@
     .bouton.secondaire{margin-top:10px;}
     .fleches{grid-template-columns:repeat(3,72px);gap:8px;}
     .fleches button{height:56px;font-size:24px;}
-    #bouton-quiz{padding:11px 13px;font-size:13px;right:10px;bottom:14px;}
-    #bouton-etoile{padding:11px 13px;font-size:18px;left:10px;bottom:14px;}
-    #bouton-dispute{width:146px;margin-left:-73px;font-size:12px;padding:11px 6px;bottom:14px;}
+    .etiq-quiz{display:none;}
+    #bouton-quiz{padding:11px 13px;font-size:17px;right:8px;bottom:20px;}
+    #bouton-etoile{padding:11px 13px;font-size:17px;left:8px;bottom:20px;}
+    #nowbar{width:calc(100vw - 140px);height:52px;bottom:20px;}
+    .nowbar-carte{font-size:12px;padding:0 8px;gap:6px;}
+    .nowbar-carte .ico{font-size:17px;}
+    .nowbar-carte .txt small{font-size:10px;}
+    #bouton-bloc{bottom:82px;font-size:12px;padding:8px 14px;}
   }
 </style>
 </head>
@@ -440,12 +660,71 @@
   </div>
 </div>
 
+<!-- PROFIL EN HAUT A GAUCHE -->
+<button id="bouton-profil" onclick="ouvrirProfil()">
+  <span class="rond-vide" id="profil-avatar">👤</span>
+  <span id="profil-nom">Se connecter</span>
+</button>
+
 <!-- BOUTONS TOUJOURS VISIBLES -->
 <button id="bouton-etoile" onclick="ouvrirEtoile()">⭐</button>
-<button id="bouton-dispute" onclick="ouvrirDispute()">⛈️ On s'est disputés</button>
 <button id="bouton-quiz" onclick="ouvrirQuiz()">
-  <span class="icone">💘</span> Quiz
+  <span class="icone">💘</span><span class="etiq-quiz">Quiz</span>
 </button>
+
+<!-- BLOC-NOTE COUPLE -->
+<button id="bouton-bloc" onclick="ouvrirBloc()">📒 Bloc-note couple <span class="pastille" id="bloc-compteur">0</span></button>
+
+<!-- NOW BAR -->
+<div id="nowbar">
+  <div id="nowbar-piste">
+    <button class="nowbar-carte" id="carte-pilule" onclick="ouvrirPilule()">
+      <span class="ico">💊</span>
+      <span class="txt" id="pilule-texte">Pilule<small>Appuie pour régler</small></span>
+    </button>
+    <button class="nowbar-carte" id="carte-dispute" onclick="ouvrirDispute()">
+      <span class="nuages"></span><span class="pluie"></span><span class="eclair"></span>
+      <span class="ico">⛈️</span>
+      <span class="txt">On s'est disputés<small>Appuie si ça gronde</small></span>
+    </button>
+  </div>
+</div>
+<div id="nowbar-points"><span class="on"></span><span></span></div>
+
+<!-- FENETRE PROFIL -->
+<div id="voile-profil" class="cache">
+  <div id="fenetre-profil">
+    <button class="fermer-modale" onclick="fermerProfil()">✖</button>
+    <p class="etape-titre">Connexion 💕</p>
+    <p class="quiz-question">C'est qui qui se connecte ?</p>
+    <div class="choix-profil">
+      <button onclick="choisirProfil('fille')">
+        <img src="images/loane.png" alt="Loane">Fille 🌸<br><small>Lolo</small>
+      </button>
+      <button onclick="choisirProfil('garcon')">
+        <img src="images/jules.png" alt="Jules">Garçon 🧢<br><small>Juju</small>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FENETRE PILULE -->
+<div id="voile-pilule" class="cache">
+  <div id="fenetre-pilule">
+    <button class="fermer-modale" onclick="fermerPilule()">✖</button>
+    <p class="etape-titre">Rappel pilule 💊</p>
+    <div id="pilule-contenu"></div>
+  </div>
+</div>
+
+<!-- FENETRE BLOC-NOTE -->
+<div id="voile-bloc" class="cache">
+  <div id="fenetre-bloc">
+    <button class="fermer-modale" onclick="fermerBloc()">✖</button>
+    <p class="etape-titre">Bloc-note couple 📒</p>
+    <div id="bloc-contenu"></div>
+  </div>
+</div>
 
 <!-- FENETRE DU QUIZ -->
 <div id="voile-quiz" class="cache">
@@ -917,6 +1196,8 @@ function fermerDispute(){
 }
 function disputeEtapeQui(){
   dispQui='';dispSujet='';dispSac='';
+  /* si on est connecté, on sait déjà qui c'est */
+  if(profil){disputeEtapeSujet(PRENOMS[profil]);return;}
   document.getElementById('dispute-contenu').innerHTML=
     '<p class="quiz-question">Avant tout... c\'est qui qui a cliqué ? 🥺</p>'+
     '<div class="quiz-reponses">'+
@@ -964,8 +1245,253 @@ function disputeFin(note){
     '<button class="bouton" onclick="fermerDispute()">Ça va mieux 🤍</button>';
 }
 
+/* ============ PROFIL (fille / garçon) ============ */
+const PHOTOS={fille:'images/loane.png',garcon:'images/jules.png'};
+const PRENOMS={fille:'Lolo',garcon:'Juju'};
+let profil=localStorage.getItem('profil-duoweb')||'';
+
+function ouvrirProfil(){document.getElementById('voile-profil').classList.remove('cache');}
+function fermerProfil(){document.getElementById('voile-profil').classList.add('cache');}
+function choisirProfil(p){
+  profil=p;
+  localStorage.setItem('profil-duoweb',p);
+  majProfil();
+  fermerProfil();
+  majNowbar();
+  majCompteurBloc();
+}
+function majProfil(){
+  const avatar=document.getElementById('profil-avatar');
+  const nom=document.getElementById('profil-nom');
+  if(profil){
+    avatar.outerHTML='<img id="profil-avatar" src="'+PHOTOS[profil]+'" alt="">';
+    nom.textContent=PRENOMS[profil];
+  }
+}
+/* on demande qui c'est dès la première visite */
+if(profil)majProfil();
+else setTimeout(ouvrirProfil,900);
+
+/* ============ NOW BAR (swipe) ============ */
+let carteActive=0;
+function allerCarte(n){
+  carteActive=Math.max(0,Math.min(1,n));
+  document.getElementById('nowbar-piste').style.transform='translateX(-'+(carteActive*50)+'%)';
+  document.querySelectorAll('#nowbar-points span').forEach((p,i)=>p.classList.toggle('on',i===carteActive));
+}
+(()=>{
+  const barre=document.getElementById('nowbar');
+  let x0=null,glisse=false;
+  barre.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;glisse=false;},{passive:true});
+  barre.addEventListener('touchmove',e=>{
+    if(x0===null)return;
+    if(Math.abs(e.touches[0].clientX-x0)>12)glisse=true;
+  },{passive:true});
+  barre.addEventListener('touchend',e=>{
+    if(x0===null)return;
+    const dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>35)allerCarte(carteActive+(dx<0?1:-1));
+    x0=null;
+  },{passive:true});
+  /* on empêche le clic si c'était un swipe */
+  barre.addEventListener('click',e=>{if(glisse){e.preventDefault();e.stopPropagation();glisse=false;}},true);
+  /* à la souris : molette horizontale ou clic sur les points */
+  document.querySelectorAll('#nowbar-points span').forEach((p,i)=>{
+    p.style.cursor='pointer';
+    p.addEventListener('click',()=>allerCarte(i));
+  });
+})();
+
+/* ============ PILULE 💊 ============ */
+function heurePilule(){return localStorage.getItem('pilule-heure')||'';}
+function prisesAujourdhui(){
+  return localStorage.getItem('pilule-prise')===new Date().toDateString();
+}
+function majNowbar(){
+  const txt=document.getElementById('pilule-texte');
+  const h=heurePilule();
+  if(!h){
+    txt.innerHTML=(profil==='garcon'?'Pilule de Lolo':'Ma pilule')+'<small>Appuie pour régler</small>';
+    return;
+  }
+  if(prisesAujourdhui()){
+    txt.innerHTML='Pilule prise ✅<small>Bravo, à demain '+h+'</small>';
+    return;
+  }
+  const [hh,mm]=h.split(':').map(Number);
+  const maintenant=new Date();
+  const cible=new Date();
+  cible.setHours(hh,mm,0,0);
+  let diff=cible-maintenant;
+  if(diff<0)diff+=86400000;
+  const heures=Math.floor(diff/3600000);
+  const minutes=Math.floor(diff%3600000/60000);
+  const reste=heures>0?'dans '+heures+'h'+String(minutes).padStart(2,'0'):'dans '+minutes+' min';
+  const qui=profil==='garcon'?'Pilule de Lolo':'Ma pilule';
+  txt.innerHTML=qui+' '+reste+'<small>Prévue à '+h+'</small>';
+}
+setInterval(majNowbar,30000);
+
+function ouvrirPilule(){
+  document.getElementById('voile-pilule').classList.remove('cache');
+  remplirPilule();
+}
+function fermerPilule(){document.getElementById('voile-pilule').classList.add('cache');}
+function remplirPilule(){
+  const h=heurePilule();
+  const zone=document.getElementById('pilule-contenu');
+  let html='';
+  if(profil==='garcon')html+='<p style="font-size:14px;margin-bottom:10px;">Tu peux voir le rappel de Lolo pour penser à lui dire 🥰</p>';
+  html+='<p class="quiz-question">'+(h?'Pilule prévue à '+h+' 💊':'À quelle heure la pilule ? 💊')+'</p>'+
+        '<input type="time" id="pilule-heure-champ" value="'+(h||'20:00')+'" style="width:100%;border:2px solid var(--rose-clair);border-radius:999px;padding:12px 18px;font-family:Quicksand,sans-serif;font-size:17px;color:var(--rose-tres-fonce);text-align:center;">'+
+        '<button class="bouton" onclick="reglerPilule()">Enregistrer l\'heure ⏰</button>';
+  if(h){
+    html+=prisesAujourdhui()
+      ?'<p class="message-chou" style="margin-top:14px;font-size:16px;">✅ Déjà prise aujourd\'hui, t\'es au top 💖</p>'
+      :'<button class="bouton secondaire" style="margin-top:10px;" onclick="pilulePrise()">Je l\'ai prise ✅</button>';
+  }
+  zone.innerHTML=html;
+}
+function reglerPilule(){
+  const v=document.getElementById('pilule-heure-champ').value;
+  if(v)localStorage.setItem('pilule-heure',v);
+  majNowbar();remplirPilule();
+}
+function pilulePrise(){
+  localStorage.setItem('pilule-prise',new Date().toDateString());
+  majNowbar();remplirPilule();
+}
+
+/* ============ BLOC-NOTE COUPLE 📒 ============ */
+function lirePages(){
+  try{return JSON.parse(localStorage.getItem('bloc-couple')||'[]');}catch(e){return [];}
+}
+function ecrirePages(p){
+  localStorage.setItem('bloc-couple',JSON.stringify(p));
+  majCompteurBloc();
+}
+function pagesVisibles(){
+  return lirePages().filter(p=>!p.prive||p.auteur===profil);
+}
+function majCompteurBloc(){
+  document.getElementById('bloc-compteur').textContent=pagesVisibles().length;
+}
+function ouvrirBloc(){
+  if(!profil){ouvrirProfil();return;}
+  document.getElementById('voile-bloc').classList.remove('cache');
+  remplirBloc();
+}
+function fermerBloc(){document.getElementById('voile-bloc').classList.add('cache');}
+function echapper(t){
+  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function remplirBloc(){
+  const pages=pagesVisibles().sort((a,b)=>b.date-a.date);
+  let html='<button class="bouton" onclick="nouvellePage()">✏️ Nouvelle page</button>';
+  if(!pages.length){
+    html+='<p style="margin-top:16px;font-size:15px;">Aucune page pour l\'instant... écris la première 💌</p>';
+  }else{
+    html+='<div style="margin-top:16px;">';
+    pages.forEach(p=>{
+      html+='<div class="page-note" id="page-'+p.id+'">'+
+        '<div class="entete"><img src="'+PHOTOS[p.auteur]+'" alt="">'+PRENOMS[p.auteur]+
+        ' <span class="etiquette'+(p.prive?' prive':'')+'">'+(p.prive?'🔒 Privé':'💞 Partagé')+'</span></div>'+
+        (p.titre?'<h4>'+echapper(p.titre)+'</h4>':'')+
+        '<p>'+echapper(p.texte)+'</p>';
+      (p.reponses||[]).forEach(r=>{
+        html+='<div class="reponse-note"><span class="qui">'+PRENOMS[r.auteur]+' a répondu :</span>'+echapper(r.texte)+'</div>';
+      });
+      html+='<div class="actions">'+
+        (p.prive?'':'<button onclick="repondrePage('+p.id+')">💬 Répondre</button>')+
+        (p.auteur===profil?'<button onclick="basculerPrive('+p.id+')">'+(p.prive?'💞 Rendre partagé':'🔒 Rendre privé')+'</button>':'')+
+        '<button class="feu" onclick="brulerPage('+p.id+')">🔥 Brûler</button>'+
+        '<button class="dechirer" onclick="dechirerPage('+p.id+')">💔 Déchirer</button>'+
+        '</div></div>';
+    });
+    html+='</div>';
+  }
+  document.getElementById('bloc-contenu').innerHTML=html;
+}
+function nouvellePage(){
+  document.getElementById('bloc-contenu').innerHTML=
+    '<p class="quiz-question">Nouvelle page ✏️</p>'+
+    '<input type="text" id="page-titre" placeholder="Un titre (facultatif)">'+
+    '<textarea id="page-texte" placeholder="Écris ce que tu veux..." style="margin-top:12px;"></textarea>'+
+    '<label style="display:flex;align-items:center;gap:8px;justify-content:center;margin-top:12px;font-weight:600;font-size:15px;cursor:pointer;">'+
+      '<input type="checkbox" id="page-prive" style="width:20px;height:20px;accent-color:#f25c94;"> 🔒 Garder cette page privée (visible que par moi)'+
+    '</label>'+
+    '<button class="bouton" onclick="enregistrerPage()">Enregistrer 📒</button>'+
+    '<button class="bouton secondaire" style="margin-top:10px;" onclick="remplirBloc()">Annuler</button>';
+}
+function nouvelId(pages){
+  let id=Date.now();
+  while(pages.some(p=>p.id===id))id++; /* jamais deux pages avec le même numéro */
+  return id;
+}
+function enregistrerPage(){
+  const texte=document.getElementById('page-texte').value.trim();
+  if(!texte){remplirBloc();return;}
+  const pages=lirePages();
+  pages.push({
+    id:nouvelId(pages),
+    auteur:profil,
+    titre:document.getElementById('page-titre').value.trim(),
+    texte:texte,
+    prive:document.getElementById('page-prive').checked,
+    date:Date.now(),
+    reponses:[]
+  });
+  ecrirePages(pages);
+  remplirBloc();
+}
+function repondrePage(id){
+  const bloc=document.getElementById('page-'+id);
+  if(bloc.querySelector('.zone-reponse'))return;
+  const zone=document.createElement('div');
+  zone.className='zone-reponse';
+  zone.innerHTML='<textarea id="rep-'+id+'" placeholder="Ta réponse..." style="margin-top:10px;min-height:70px;"></textarea>'+
+    '<button class="bouton" style="margin-top:8px;" onclick="enregistrerReponse('+id+')">Envoyer 💬</button>';
+  bloc.appendChild(zone);
+  document.getElementById('rep-'+id).focus();
+}
+function enregistrerReponse(id){
+  const texte=document.getElementById('rep-'+id).value.trim();
+  if(!texte)return;
+  const pages=lirePages();
+  const p=pages.find(x=>x.id===id);
+  if(p){(p.reponses=p.reponses||[]).push({auteur:profil,texte:texte,date:Date.now()});ecrirePages(pages);}
+  remplirBloc();
+}
+function basculerPrive(id){
+  const pages=lirePages();
+  const p=pages.find(x=>x.id===id);
+  if(p){p.prive=!p.prive;ecrirePages(pages);}
+  remplirBloc();
+}
+function supprimerPage(id){
+  ecrirePages(lirePages().filter(p=>p.id!==id));
+}
+function brulerPage(id){
+  const bloc=document.getElementById('page-'+id);
+  bloc.classList.add('en-feu');
+  setTimeout(()=>{supprimerPage(id);remplirBloc();},1500);
+}
+function dechirerPage(id){
+  const bloc=document.getElementById('page-'+id);
+  const h=bloc.offsetHeight;
+  bloc.style.height=h+'px';
+  const g=document.createElement('div');g.className='moitie g';
+  const d=document.createElement('div');d.className='moitie d';
+  bloc.appendChild(g);bloc.appendChild(d);
+  bloc.classList.add('dechiree');
+  setTimeout(()=>{supprimerPage(id);remplirBloc();},1400);
+}
+
+/* démarrage */
+majNowbar();majCompteurBloc();
+
 /* fermeture en cliquant à côté */
-['voile-quiz','voile-etoile','voile-dispute'].forEach(id=>{
+['voile-quiz','voile-etoile','voile-dispute','voile-profil','voile-pilule','voile-bloc'].forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{
     if(e.target.id===id)document.getElementById(id).classList.add('cache');
   });
