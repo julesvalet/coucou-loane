@@ -1,21 +1,13 @@
 /* ============================================================
-   CONFIG FIREBASE — À REMPLIR PAR JULES
+   CONFIG FIREBASE
    ------------------------------------------------------------
-   Tant que ce fichier est vide, le bloc-note fonctionne en local
-   (chaque téléphone a ses propres pages).
+   Projet : coucouloane-86352 (Realtime Database, europe-west1)
 
-   Dès que tu colles ta config ici, le bloc-note se synchronise
-   en temps réel entre le téléphone de Lolo et celui de Juju 💞
-
-   Où trouver ces infos :
-   console.firebase.google.com → ton projet → ⚙️ Paramètres du projet
-   → tout en bas "Vos applications" → application Web → Configuration
+   Pour la Realtime Database, seul databaseURL est indispensable.
    ============================================================ */
 
 window.FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",   // ← le plus important, ressemble à https://xxx-default-rtdb.europe-west1.firebasedatabase.app
-  projectId: "",
-  appId: ""
+  databaseURL: "https://coucouloane-86352-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "coucouloane-86352",
+  authDomain: "coucouloane-86352.firebaseapp.com"
 };
