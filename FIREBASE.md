@@ -62,15 +62,23 @@ Puis publie :
 cd "C:\Users\jules\Documents\duoweb" && git add -A && git commit -m "Config Firebase" && git push
 ```
 
-## 6. Le code secret du couple
+## 6. Le code du couple
 
-À la première ouverture du bloc-note, le site demande un **code secret**.
-Mettez **exactement le même** sur les deux téléphones (au moins 8 caractères), par exemple `loloetjuju29092022`.
+**Il n'y a plus rien à taper.** Le code est fixé à **2909** dans le code du site
+(chemin `couples/lolojuju2909`, allongé car Firebase exige 8 caractères minimum).
 
-C'est ce code qui relie vos deux téléphones.
+Les deux téléphones utilisent automatiquement le même : plus aucun risque de décalage.
+
+Pour le changer un jour, modifie cette ligne dans `index.html` :
+
+```js
+const CHEMIN_COUPLE='lolojuju2909';
+```
 
 ## Ce qu'il faut savoir 🔐
 
 - Les pages **🔒 privées** ne partent **jamais** en ligne : elles restent sur le téléphone de celui qui les écrit.
-- Les pages **💞 partagées** sont dans Firebase. Quiconque connaît votre code secret pourrait les lire → choisissez un code que personne ne devine, et ne le donnez à personne.
+- Les pages **💞 partagées** sont dans Firebase. Le chemin `lolojuju2909` est écrit
+  dans le code source du site, qui est public → quelqu'un qui va le lire pourrait
+  accéder aux pages partagées. Pour des mots doux ça va, mais n'y mettez rien de sensible.
 - Si `config.js` reste vide, tout continue de marcher, mais chaque téléphone garde ses propres pages.
