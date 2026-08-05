@@ -7,6 +7,7 @@
 <title>Coucou Loane 💖</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <style>
   :root{
     --rose-bb:#ffe4ef;
@@ -1363,13 +1364,42 @@ function pilulePrise(){
 }
 
 /* ============ BLOC-NOTE COUPLE 📒 ============ */
-function lirePages(){
+/* pagesDistantes = null tant qu'on n'est pas connecté à Firebase.
+   En mode connecté : les pages PARTAGÉES vivent en ligne,
+   les pages PRIVÉES restent uniquement sur le téléphone 🔒 */
+let pagesDistantes=null;
+
+function firebasePret(){
+  return !!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.databaseURL);
+}
+function codeCouple(){return localStorage.getItem('code-couple')||'';}
+
+function lirePagesLocales(){
   try{return JSON.parse(localStorage.getItem('bloc-couple')||'[]');}catch(e){return [];}
 }
+function lirePages(){
+  const locales=lirePagesLocales();
+  if(pagesDistantes===null)return locales;
+  return [...locales.filter(p=>p.prive),...pagesDistantes];
+}
 function ecrirePages(p){
-  localStorage.setItem('bloc-couple',JSON.stringify(p));
+  if(pagesDistantes===null){
+    localStorage.setItem('bloc-couple',JSON.stringify(p));
+  }else{
+    localStorage.setItem('bloc-couple',JSON.stringify(p.filter(x=>x.prive)));
+    pagesDistantes=p.filter(x=>!x.prive);
+    if(window.envoyerAuCloud)window.envoyerAuCloud(pagesDistantes);
+  }
   majCompteurBloc();
 }
+/* appelé par Firebase quand l'autre modifie quelque chose */
+window.surPagesDistantes=function(liste){
+  pagesDistantes=Array.isArray(liste)?liste:[];
+  majCompteurBloc();
+  const ouvert=!document.getElementById('voile-bloc').classList.contains('cache');
+  const enTrainDecrire=document.getElementById('page-texte')||document.querySelector('.zone-reponse');
+  if(ouvert&&!enTrainDecrire)remplirBloc(); /* on n'efface jamais ce qui est en train d'être écrit */
+};
 function pagesVisibles(){
   return lirePages().filter(p=>!p.prive||p.auteur===profil);
 }
@@ -1379,6 +1409,28 @@ function majCompteurBloc(){
 function ouvrirBloc(){
   if(!profil){ouvrirProfil();return;}
   document.getElementById('voile-bloc').classList.remove('cache');
+  /* si Firebase est configuré mais qu'on n'a pas encore le code secret du couple */
+  if(firebasePret()&&!codeCouple()){demanderCode();return;}
+  remplirBloc();
+}
+function demanderCode(){
+  document.getElementById('bloc-contenu').innerHTML=
+    '<p class="quiz-question">Le code secret du couple 🔐</p>'+
+    '<p style="font-size:14px;line-height:1.5;margin-bottom:12px;">Mettez le <b>même code</b> sur vos deux téléphones pour partager le bloc-note. Choisissez-en un long, que personne d\'autre ne peut deviner 🤫</p>'+
+    '<input type="text" id="champ-code" placeholder="ex: loloetjuju29092022" autocomplete="off">'+
+    '<button class="bouton" onclick="validerCode()">C\'est parti 💞</button>'+
+    '<p class="petit">Les pages 🔒 privées ne partent jamais en ligne, elles restent sur ton téléphone.</p>';
+}
+function validerCode(){
+  const brut=(document.getElementById('champ-code').value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(brut.length<8){
+    document.getElementById('champ-code').style.borderColor='#e74c3c';
+    document.getElementById('champ-code').placeholder='Au moins 8 caractères...';
+    document.getElementById('champ-code').value='';
+    return;
+  }
+  localStorage.setItem('code-couple',brut);
+  if(window.demarrerCloud)window.demarrerCloud();
   remplirBloc();
 }
 function fermerBloc(){document.getElementById('voile-bloc').classList.add('cache');}
@@ -1515,6 +1567,38 @@ canvas.addEventListener('touchend',e=>{
   else direction(0,dy>0?1:-1);
   touche=null;
 },{passive:true});
+</script>
+
+<!-- ====== SYNCHRONISATION FIREBASE (bloc-note partagé) ====== -->
+<script type="module">
+if(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.databaseURL){
+  try{
+    const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const {getDatabase,ref,onValue,set}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+    const app=initializeApp(window.FIREBASE_CONFIG);
+    const db=getDatabase(app);
+    let chemin=null;
+
+    window.demarrerCloud=function(){
+      const code=localStorage.getItem('code-couple')||'';
+      if(!code||chemin)return;
+      chemin=ref(db,'couples/'+code+'/pages');
+      onValue(chemin,instantane=>{
+        const val=instantane.val();
+        window.surPagesDistantes(Array.isArray(val)?val:(val?Object.values(val):[]));
+      },err=>{
+        console.warn('Firebase lecture impossible :',err.message);
+      });
+    };
+    window.envoyerAuCloud=function(pages){
+      if(!chemin)return;
+      set(chemin,pages).catch(e=>console.warn('Firebase écriture impossible :',e.message));
+    };
+    if(localStorage.getItem('code-couple'))window.demarrerCloud();
+  }catch(e){
+    console.warn('Firebase non chargé, le bloc-note reste en local :',e.message);
+  }
+}
 </script>
 </body>
 </html>
