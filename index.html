@@ -1404,7 +1404,8 @@ function pilulePrise(){
 /* pagesDistantes = null tant qu'on n'est pas connecté à Firebase.
    En mode connecté : les pages PARTAGÉES vivent en ligne,
    les pages PRIVÉES restent uniquement sur le téléphone 🔒 */
-let pagesDistantes=null;
+let pagesDistantes=null;  /* null = on n'a pas encore reçu les pages en ligne */
+let cloudActif=false;     /* true dès que Firebase est configuré et le code saisi */
 
 function firebasePret(){
   return !!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.databaseURL);
@@ -1414,24 +1415,62 @@ function codeCouple(){return localStorage.getItem('code-couple')||'';}
 function lirePagesLocales(){
   try{return JSON.parse(localStorage.getItem('bloc-couple')||'[]');}catch(e){return [];}
 }
+/* pages écrites avant que la connexion soit établie : elles attendent leur tour */
+function lireEnAttente(){
+  try{return JSON.parse(localStorage.getItem('bloc-attente')||'[]');}catch(e){return [];}
+}
+function ecrireEnAttente(p){localStorage.setItem('bloc-attente',JSON.stringify(p));}
+
+function activerCloud(){
+  if(cloudActif)return;
+  cloudActif=true;
+  /* les pages partagées déjà écrites en local montent dans la file d'attente */
+  const locales=lirePagesLocales();
+  const partagees=locales.filter(p=>!p.prive);
+  if(partagees.length){
+    const attente=lireEnAttente();
+    const parId=new Map();
+    [...attente,...partagees].forEach(p=>parId.set(p.id,p));
+    ecrireEnAttente([...parId.values()]);
+    localStorage.setItem('bloc-couple',JSON.stringify(locales.filter(p=>p.prive)));
+  }
+}
 function lirePages(){
   const locales=lirePagesLocales();
-  if(pagesDistantes===null)return locales;
-  return [...locales.filter(p=>p.prive),...pagesDistantes];
+  if(!cloudActif)return locales;
+  const parId=new Map();
+  (pagesDistantes||[]).forEach(p=>parId.set(p.id,p));
+  lireEnAttente().forEach(p=>parId.set(p.id,p));
+  return [...locales.filter(p=>p.prive),...parId.values()];
 }
 function ecrirePages(p){
-  if(pagesDistantes===null){
+  if(!cloudActif){
     localStorage.setItem('bloc-couple',JSON.stringify(p));
   }else{
     localStorage.setItem('bloc-couple',JSON.stringify(p.filter(x=>x.prive)));
-    pagesDistantes=p.filter(x=>!x.prive);
-    if(window.envoyerAuCloud)window.envoyerAuCloud(pagesDistantes);
+    const partagees=p.filter(x=>!x.prive);
+    if(pagesDistantes===null){
+      ecrireEnAttente(partagees); /* pas encore connecté : on garde sous le coude */
+    }else{
+      ecrireEnAttente([]);
+      pagesDistantes=partagees;
+      if(window.envoyerAuCloud)window.envoyerAuCloud(partagees);
+    }
   }
   majCompteurBloc();
 }
 /* appelé par Firebase quand l'autre modifie quelque chose */
 window.surPagesDistantes=function(liste){
-  pagesDistantes=Array.isArray(liste)?liste:[];
+  pagesDistantes=Array.isArray(liste)?liste:(liste?Object.values(liste):[]);
+  const attente=lireEnAttente();
+  if(attente.length){ /* on envoie enfin ce qui attendait */
+    const parId=new Map();
+    pagesDistantes.forEach(p=>parId.set(p.id,p));
+    attente.forEach(p=>parId.set(p.id,p));
+    pagesDistantes=[...parId.values()];
+    ecrireEnAttente([]);
+    if(window.envoyerAuCloud)window.envoyerAuCloud(pagesDistantes);
+  }
   majCompteurBloc();
   const ouvert=!document.getElementById('voile-bloc').classList.contains('cache');
   const enTrainDecrire=document.getElementById('page-texte')||document.querySelector('.zone-reponse');
@@ -1467,6 +1506,7 @@ function validerCode(){
     return;
   }
   localStorage.setItem('code-couple',brut);
+  activerCloud();
   if(window.demarrerCloud)window.demarrerCloud();
   remplirBloc();
 }
@@ -1577,6 +1617,7 @@ function dechirerPage(id){
 }
 
 /* démarrage */
+if(firebasePret()&&codeCouple())activerCloud();
 majNowbar();majCompteurBloc();
 
 /* fermeture en cliquant à côté */
