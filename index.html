@@ -293,6 +293,13 @@
     transition:all .15s;
   }
   .choix-profil button:hover{border-color:var(--rose-fonce);transform:translateY(-3px);}
+  @keyframes secousse{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-9px);}
+    40%{transform:translateX(9px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
   .choix-profil img{
     width:88px;height:88px;border-radius:50%;object-fit:cover;
     display:block;margin:0 auto 8px;border:3px solid var(--rose);
@@ -697,15 +704,7 @@
   <div id="fenetre-profil">
     <button class="fermer-modale" onclick="fermerProfil()">✖</button>
     <p class="etape-titre">Connexion 💕</p>
-    <p class="quiz-question">C'est qui qui se connecte ?</p>
-    <div class="choix-profil">
-      <button onclick="choisirProfil('fille')">
-        <img src="images/loane.png" alt="Loane">Fille 🌸<br><small>Lolo</small>
-      </button>
-      <button onclick="choisirProfil('garcon')">
-        <img src="images/jules.png" alt="Jules">Garçon 🧢<br><small>Juju</small>
-      </button>
-    </div>
+    <div id="profil-contenu"></div>
   </div>
 </div>
 
@@ -1249,10 +1248,48 @@ function disputeFin(note){
 /* ============ PROFIL (fille / garçon) ============ */
 const PHOTOS={fille:'images/loane.png',garcon:'images/jules.png'};
 const PRENOMS={fille:'Lolo',garcon:'Juju'};
+/* CODES DE CONNEXION — modifiables ici */
+const CODES={fille:'120107',garcon:'1974'};
 let profil=localStorage.getItem('profil-duoweb')||'';
 
-function ouvrirProfil(){document.getElementById('voile-profil').classList.remove('cache');}
+function ouvrirProfil(){
+  document.getElementById('voile-profil').classList.remove('cache');
+  ecranChoixProfil();
+}
 function fermerProfil(){document.getElementById('voile-profil').classList.add('cache');}
+function ecranChoixProfil(){
+  document.getElementById('profil-contenu').innerHTML=
+    '<p class="quiz-question">C\'est qui qui se connecte ?</p>'+
+    '<div class="choix-profil">'+
+      '<button onclick="ecranCode(\'fille\')"><img src="'+PHOTOS.fille+'" alt="">Fille 🌸<br><small>Lolo</small></button>'+
+      '<button onclick="ecranCode(\'garcon\')"><img src="'+PHOTOS.garcon+'" alt="">Garçon 🧢<br><small>Juju</small></button>'+
+    '</div>';
+}
+function ecranCode(p){
+  document.getElementById('profil-contenu').innerHTML=
+    '<img src="'+PHOTOS[p]+'" alt="" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--rose);margin-bottom:10px;">'+
+    '<p class="quiz-question">Coucou '+PRENOMS[p]+' 💕<br>Ton code ?</p>'+
+    '<input type="password" id="champ-code-profil" inputmode="numeric" autocomplete="off" placeholder="• • • • • •" '+
+      'style="text-align:center;letter-spacing:6px;font-size:22px;" '+
+      'onkeydown="if(event.key===\'Enter\')verifierCodeProfil(\''+p+'\')">'+
+    '<p id="erreur-code" style="color:#e74c3c;font-weight:700;font-size:14px;min-height:20px;margin-top:8px;"></p>'+
+    '<button class="bouton" onclick="verifierCodeProfil(\''+p+'\')">Se connecter 💖</button>'+
+    '<button class="bouton secondaire" style="margin-top:10px;" onclick="ecranChoixProfil()">Retour</button>';
+  setTimeout(()=>document.getElementById('champ-code-profil').focus(),100);
+}
+function verifierCodeProfil(p){
+  const champ=document.getElementById('champ-code-profil');
+  const saisi=(champ.value||'').replace(/\D/g,'');
+  if(saisi===CODES[p]){
+    choisirProfil(p);
+  }else{
+    document.getElementById('erreur-code').textContent='Mauvais code 🥺 réessaie';
+    champ.value='';
+    champ.style.animation='none';
+    setTimeout(()=>{champ.style.animation='secousse .4s';},10);
+    champ.focus();
+  }
+}
 function choisirProfil(p){
   profil=p;
   localStorage.setItem('profil-duoweb',p);
