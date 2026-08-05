@@ -7,7 +7,7 @@
 <title>Coucou Loane 💖</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
-<script src="config.js?v=2"></script>
+<script src="config.js?v=3"></script>
 <style>
   :root{
     --rose-bb:#ffe4ef;
@@ -1410,7 +1410,11 @@ let cloudActif=false;     /* true dès que Firebase est configuré et le code sa
 function firebasePret(){
   return !!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.databaseURL);
 }
-function codeCouple(){return localStorage.getItem('code-couple')||'';}
+/* Le code du couple : 2909, allongé car Firebase exige au moins 8 caractères.
+   Il est le même pour les deux téléphones, plus rien à taper. */
+const CHEMIN_COUPLE='lolojuju2909';
+window.CHEMIN_COUPLE=CHEMIN_COUPLE;
+function codeCouple(){return CHEMIN_COUPLE;}
 
 function lirePagesLocales(){
   try{return JSON.parse(localStorage.getItem('bloc-couple')||'[]');}catch(e){return [];}
@@ -1485,31 +1489,19 @@ function majCompteurBloc(){
 function ouvrirBloc(){
   if(!profil){ouvrirProfil();return;}
   document.getElementById('voile-bloc').classList.remove('cache');
-  /* si Firebase est configuré mais qu'on n'a pas encore le code secret du couple */
-  if(firebasePret()&&!codeCouple()){demanderCode();return;}
   remplirBloc();
 }
-function demanderCode(){
-  document.getElementById('bloc-contenu').innerHTML=
-    '<p class="quiz-question">Le code secret du couple 🔐</p>'+
-    '<p style="font-size:14px;line-height:1.5;margin-bottom:12px;">Mettez le <b>même code</b> sur vos deux téléphones pour partager le bloc-note. Choisissez-en un long, que personne d\'autre ne peut deviner 🤫</p>'+
-    '<input type="text" id="champ-code" placeholder="ex: loloetjuju29092022" autocomplete="off">'+
-    '<button class="bouton" onclick="validerCode()">C\'est parti 💞</button>'+
-    '<p class="petit">Les pages 🔒 privées ne partent jamais en ligne, elles restent sur ton téléphone.</p>';
-}
-function validerCode(){
-  const brut=(document.getElementById('champ-code').value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  if(brut.length<8){
-    document.getElementById('champ-code').style.borderColor='#e74c3c';
-    document.getElementById('champ-code').placeholder='Au moins 8 caractères...';
-    document.getElementById('champ-code').value='';
-    return;
-  }
-  localStorage.setItem('code-couple',brut);
-  activerCloud();
-  if(window.demarrerCloud)window.demarrerCloud();
-  remplirBloc();
-}
+/* récupère les pages écrites sous un ancien code et les remet avec les autres */
+window.fusionnerAncienBloc=function(anciennes){
+  if(!anciennes||!anciennes.length)return;
+  const parId=new Map();
+  (pagesDistantes||[]).forEach(p=>parId.set(p.id,p));
+  anciennes.forEach(p=>parId.set(p.id,p));
+  pagesDistantes=[...parId.values()];
+  if(window.envoyerAuCloud)window.envoyerAuCloud(pagesDistantes);
+  majCompteurBloc();
+  if(!document.getElementById('voile-bloc').classList.contains('cache'))remplirBloc();
+};
 function fermerBloc(){document.getElementById('voile-bloc').classList.add('cache');}
 function echapper(t){
   return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1617,7 +1609,7 @@ function dechirerPage(id){
 }
 
 /* démarrage */
-if(firebasePret()&&codeCouple())activerCloud();
+if(firebasePret())activerCloud();
 majNowbar();majCompteurBloc();
 
 /* fermeture en cliquant à côté */
@@ -1652,27 +1644,34 @@ canvas.addEventListener('touchend',e=>{
 if(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.databaseURL){
   try{
     const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const {getDatabase,ref,onValue,set}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+    const {getDatabase,ref,onValue,set,get}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
     const app=initializeApp(window.FIREBASE_CONFIG);
     const db=getDatabase(app);
+    const enTableau=v=>Array.isArray(v)?v:(v?Object.values(v):[]);
     let chemin=null;
 
     window.demarrerCloud=function(){
-      const code=localStorage.getItem('code-couple')||'';
-      if(!code||chemin)return;
-      chemin=ref(db,'couples/'+code+'/pages');
+      if(chemin)return;
+      chemin=ref(db,'couples/'+window.CHEMIN_COUPLE+'/pages');
       onValue(chemin,instantane=>{
-        const val=instantane.val();
-        window.surPagesDistantes(Array.isArray(val)?val:(val?Object.values(val):[]));
+        window.surPagesDistantes(enTableau(instantane.val()));
       },err=>{
         console.warn('Firebase lecture impossible :',err.message);
       });
+      /* si ce téléphone avait un ancien code, on rapatrie ses pages puis on l'oublie */
+      const ancien=localStorage.getItem('code-couple');
+      if(ancien&&ancien!==window.CHEMIN_COUPLE){
+        get(ref(db,'couples/'+ancien+'/pages')).then(s=>{
+          window.fusionnerAncienBloc(enTableau(s.val()));
+          localStorage.removeItem('code-couple');
+        }).catch(()=>localStorage.removeItem('code-couple'));
+      }
     };
     window.envoyerAuCloud=function(pages){
       if(!chemin)return;
       set(chemin,pages).catch(e=>console.warn('Firebase écriture impossible :',e.message));
     };
-    if(localStorage.getItem('code-couple'))window.demarrerCloud();
+    window.demarrerCloud();
   }catch(e){
     console.warn('Firebase non chargé, le bloc-note reste en local :',e.message);
   }
